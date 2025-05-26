@@ -43,17 +43,33 @@ func parseArgs(args []string) (map[string]any, error) {
 	return m, nil
 }
 
+// runTemplateStdout runs the template in file with data and writes to Stdout.
+func runTemplateStdout(file string, data any) error {
+	t, err := NewDocTemplate(file)
+	if err != nil {
+		return err
+	}
+
+	return t.Execute(os.Stdout, data)
+}
+
 // Run is the main entry point.
 func Run() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "Command line arguments missing")
 		os.Exit(1)
 	}
+	file := os.Args[1]
 	args := os.Args[2:]
 
-	_, err := parseArgs(args)
+	data, err := parseArgs(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing arguments: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := runTemplateStdout(file, data); err != nil {
+		fmt.Fprintf(os.Stderr, "Error executing template: %v\n", err)
 		os.Exit(1)
 	}
 }
