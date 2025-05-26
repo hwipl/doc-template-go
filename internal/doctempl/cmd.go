@@ -1,3 +1,4 @@
+// Package doctempl contains document templates.
 package doctempl
 
 import (
