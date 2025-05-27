@@ -38,7 +38,17 @@ func parseArgs(args []string) (map[string]any, error) {
 		if len(s) != 2 {
 			continue
 		}
-		m[s[0]] = s[1]
+		key := s[0]
+		val := s[1]
+
+		// lists
+		if strings.HasPrefix(val, "[") && strings.HasSuffix(val, "]") {
+			l := val[1 : len(val)-1]
+			m[key] = strings.Split(l, ",")
+			continue
+		}
+
+		m[key] = val
 	}
 	return m, nil
 }
