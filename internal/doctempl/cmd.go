@@ -48,6 +48,22 @@ func parseArgs(args []string) (map[string]any, error) {
 			continue
 		}
 
+		// maps
+		if strings.HasPrefix(val, "{") && strings.HasSuffix(val, "}") {
+			kv := map[string]string{}
+			s := val[1 : len(val)-1]
+			for pair := range strings.SplitSeq(s, ",") {
+				p := strings.SplitN(pair, ":", 2)
+				if len(p) == 2 {
+					k := p[0]
+					v := p[1]
+					kv[k] = v
+				}
+			}
+			m[key] = kv
+			continue
+		}
+
 		m[key] = val
 	}
 	return m, nil
