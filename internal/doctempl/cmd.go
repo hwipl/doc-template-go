@@ -2,6 +2,7 @@
 package doctempl
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -30,9 +31,19 @@ func NewDocTemplate(file string) (*DocTemplate, error) {
 	return &DocTemplate{file, tmpl}, nil
 }
 
+// parseJSON converts the json in s to a map.
+func parseJSON(s string) (map[string]any, error) {
+	m := map[string]any{}
+	if err := json.Unmarshal([]byte(s), &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // parseArgs converts command line arguments in args to a map.
 func parseArgs(args []string) (map[string]any, error) {
 	m := map[string]any{}
+
 	for _, arg := range args {
 		s := strings.SplitN(arg, "=", 2)
 		if len(s) != 2 {
@@ -40,6 +51,11 @@ func parseArgs(args []string) (map[string]any, error) {
 		}
 		key := s[0]
 		val := s[1]
+
+		// json
+		if key == "json" {
+			return parseJSON(val)
+		}
 
 		// lists
 		if strings.HasPrefix(val, "[") && strings.HasSuffix(val, "]") {
