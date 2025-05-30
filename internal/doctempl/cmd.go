@@ -3,6 +3,7 @@ package doctempl
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -52,11 +53,6 @@ func parseArgs(args []string) (map[string]any, error) {
 		key := s[0]
 		val := s[1]
 
-		// json
-		if key == "json" {
-			return parseJSON(val)
-		}
-
 		// lists
 		if strings.HasPrefix(val, "[") && strings.HasSuffix(val, "]") {
 			l := val[1 : len(val)-1]
@@ -97,20 +93,32 @@ func runTemplateStdout(file string, data any) error {
 
 // Run is the main entry point.
 func Run() {
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "Command line arguments missing")
+	// command line arguments
+	file := flag.String("file", "", "read template from `file`")
+	json := flag.String("json", "", "read input data from `json`")
+
+	flag.Parse()
+
+	if *file == "" {
+		flag.Usage()
 		os.Exit(1)
 	}
-	file := os.Args[1]
-	args := os.Args[2:]
 
-	data, err := parseArgs(args)
+	data, err := parseArgs(flag.Args())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing arguments: %v\n", err)
 		os.Exit(1)
 	}
 
-	if err := runTemplateStdout(file, data); err != nil {
+	if *json != "" {
+		data, err = parseJSON(*json)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing json: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	if err := runTemplateStdout(*file, data); err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing template: %v\n", err)
 		os.Exit(1)
 	}
