@@ -53,6 +53,13 @@ func parseArgs(args []string) (map[string]any, error) {
 		key := s[0]
 		val := s[1]
 
+		// json
+		var j any
+		if err := json.Unmarshal([]byte(val), &j); err == nil {
+			m[key] = j
+			continue
+		}
+
 		// lists
 		if strings.HasPrefix(val, "[") && strings.HasSuffix(val, "]") {
 			l := val[1 : len(val)-1]
