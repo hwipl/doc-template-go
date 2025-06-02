@@ -11,6 +11,18 @@ import (
 	"text/template"
 )
 
+// ConfigTemplate is a template configuration in Config.
+type ConfigTemplate struct {
+	File   string
+	Output string
+	Data   map[string]any
+}
+
+// Config is a document template configuration.
+type Config struct {
+	Templates []*ConfigTemplate
+}
+
 // DocTemplate is a document template.
 type DocTemplate struct {
 	File     string
@@ -98,6 +110,17 @@ func runTemplateStdout(file string, data any) error {
 	return t.Execute(os.Stdout, data)
 }
 
+// runTemplates runs the templates in config.
+func runTemplates(config *Config) error {
+	for _, tmpl := range config.Templates {
+		if err := runTemplateStdout(tmpl.File, tmpl.Data); err != nil {
+			return fmt.Errorf("error executing template %s: %w",
+				tmpl.File, err)
+		}
+	}
+	return nil
+}
+
 // Run is the main entry point.
 func Run() {
 	// command line arguments
@@ -125,8 +148,13 @@ func Run() {
 		}
 	}
 
-	if err := runTemplateStdout(*file, data); err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing template: %v\n", err)
+	config := &Config{
+		Templates: []*ConfigTemplate{
+			{File: *file, Data: data},
+		},
+	}
+	if err := runTemplates(config); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running templates: %v\n", err)
 		os.Exit(1)
 	}
 }
