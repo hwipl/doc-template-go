@@ -23,6 +23,19 @@ type Config struct {
 	Templates []*ConfigTemplate
 }
 
+// LoadConfig loads a Config from file.
+func LoadConfig(file string) (*Config, error) {
+	f, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	c := &Config{}
+	if err := json.Unmarshal(f, c); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 // DocTemplate is a document template.
 type DocTemplate struct {
 	File     string
@@ -129,11 +142,26 @@ func Run() {
 
 	flag.Parse()
 
-	if *file == "" {
+	// read config file
+	configFile := ".doc-template-go.json"
+	config, err := LoadConfig(configFile)
+	if err != nil {
+		fmt.Printf("Could not load config file: %v\n", err)
+		config = &Config{}
+	}
+
+	// template file argument
+	if *file != "" {
+		config.Templates = []*ConfigTemplate{
+			{File: *file},
+		}
+	}
+	if len(config.Templates) == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
 
+	// data arguments
 	data, err := parseArgs(flag.Args())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing arguments: %v\n", err)
@@ -148,11 +176,13 @@ func Run() {
 		}
 	}
 
-	config := &Config{
-		Templates: []*ConfigTemplate{
-			{File: *file, Data: data},
-		},
+	// set data in config
+	if len(data) != 0 {
+		for _, tmpl := range config.Templates {
+			tmpl.Data = data
+		}
 	}
+
 	if err := runTemplates(config); err != nil {
 		fmt.Fprintf(os.Stderr, "Error running templates: %v\n", err)
 		os.Exit(1)
