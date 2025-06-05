@@ -145,7 +145,7 @@ func Run() {
 	// read config file
 	config, err := LoadConfig(*configFile)
 	if err != nil {
-		fmt.Printf("Could not load config file: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Could not load config file: %v\n", err)
 		config = &Config{}
 	}
 
