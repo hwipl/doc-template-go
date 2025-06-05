@@ -139,12 +139,11 @@ func Run() {
 	// command line arguments
 	file := flag.String("file", "", "read template from `file`")
 	json := flag.String("json", "", "read input data from `json`")
-
+	configFile := flag.String("config", ".doc-template-go.json", "read configuration from `file`")
 	flag.Parse()
 
 	// read config file
-	configFile := ".doc-template-go.json"
-	config, err := LoadConfig(configFile)
+	config, err := LoadConfig(*configFile)
 	if err != nil {
 		fmt.Printf("Could not load config file: %v\n", err)
 		config = &Config{}
