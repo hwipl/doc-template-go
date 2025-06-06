@@ -13,9 +13,10 @@ import (
 
 // ConfigTemplate is a template configuration in Config.
 type ConfigTemplate struct {
-	File   string
-	Output string
-	Data   map[string]any
+	File     string
+	Output   string
+	Data     map[string]any
+	DataFile string
 }
 
 // Config is a document template configuration.
@@ -57,13 +58,27 @@ func NewDocTemplate(file string) (*DocTemplate, error) {
 	return &DocTemplate{file, tmpl}, nil
 }
 
-// parseJSON converts the json in s to a map.
-func parseJSON(s string) (map[string]any, error) {
+// parseJSON converts the json in b to a map.
+func parseJSON(b []byte) (map[string]any, error) {
 	m := map[string]any{}
-	if err := json.Unmarshal([]byte(s), &m); err != nil {
+	if err := json.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
 	return m, nil
+}
+
+// parseJSONFile converts the json in file to a map.
+func parseJSONFile(file string) (map[string]any, error) {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return parseJSON(b)
+}
+
+// parseJSONArg converts the json in arg to a map.
+func parseJSONArg(arg string) (map[string]any, error) {
+	return parseJSON([]byte(arg))
 }
 
 // parseArgs converts command line arguments in args to a map.
@@ -160,6 +175,19 @@ func Run() {
 		os.Exit(1)
 	}
 
+	// data file
+	for _, tmpl := range config.Templates {
+		if tmpl.DataFile == "" {
+			continue
+		}
+		data, err := parseJSONFile(tmpl.DataFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
+			os.Exit(1)
+		}
+		tmpl.Data = data
+	}
+
 	// data arguments
 	data, err := parseArgs(flag.Args())
 	if err != nil {
@@ -168,7 +196,7 @@ func Run() {
 	}
 
 	if *json != "" {
-		data, err = parseJSON(*json)
+		data, err = parseJSONArg(*json)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing json: %v\n", err)
 			os.Exit(1)
