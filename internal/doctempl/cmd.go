@@ -79,20 +79,32 @@ func parseArgs(args []string) (map[string]any, error) {
 	return m, nil
 }
 
-// runTemplateStdout runs the template in file with data and writes to Stdout.
-func runTemplateStdout(file string, data any) error {
+// runTemplate runs the template in file with data and writes to the file in
+// output or to Stdout if output is empty.
+func runTemplate(file string, data any, output string) (err error) {
 	t, err := NewDocTemplate(file)
 	if err != nil {
 		return err
 	}
 
-	return t.Execute(os.Stdout, data)
+	if output == "" {
+		return t.Execute(os.Stdout, data)
+	}
+
+	f, err := os.OpenFile(output, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = f.Close()
+	}()
+	return t.Execute(f, data)
 }
 
 // runTemplates runs the templates in config.
 func runTemplates(config *Config) error {
 	for _, tmpl := range config.Templates {
-		if err := runTemplateStdout(tmpl.File, tmpl.Data); err != nil {
+		if err := runTemplate(tmpl.File, tmpl.Data, tmpl.Output); err != nil {
 			return fmt.Errorf("error executing template %s: %w",
 				tmpl.File, err)
 		}
