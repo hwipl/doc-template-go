@@ -116,6 +116,7 @@ func runTemplates(config *Config) error {
 func Run() {
 	// command line arguments
 	file := flag.String("file", "", "read template from `file`")
+	output := flag.String("output", "", "write output to `file`")
 	json := flag.String("json", "", "read input data from `json`")
 	configFile := flag.String("config", ".doc-template-go.json", "read configuration from `file`")
 	flag.Parse()
@@ -163,6 +164,13 @@ func Run() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing json: %v\n", err)
 			os.Exit(1)
+		}
+	}
+
+	// set output in config
+	if *output != "" {
+		for _, tmpl := range config.Templates {
+			tmpl.Output = *output
 		}
 	}
 
