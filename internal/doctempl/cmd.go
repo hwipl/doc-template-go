@@ -117,6 +117,7 @@ func Run() {
 	// command line arguments
 	file := flag.String("file", "", "read template from `file`")
 	output := flag.String("output", "", "write output to `file`")
+	dataFile := flag.String("data-file", "", "load data from `file`")
 	json := flag.String("json", "", "read input data from `json`")
 	configFile := flag.String("config", ".doc-template-go.json", "read configuration from `file`")
 	flag.Parse()
@@ -140,16 +141,29 @@ func Run() {
 	}
 
 	// data file
-	for _, tmpl := range config.Templates {
-		if tmpl.DataFile == "" {
-			continue
-		}
-		data, err := parseJSONFile(tmpl.DataFile)
+	if *dataFile != "" {
+		// data file from command line arguments
+		data, err := parseJSONFile(*dataFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
 			os.Exit(1)
 		}
-		tmpl.Data = data
+		for _, tmpl := range config.Templates {
+			tmpl.Data = data
+		}
+	} else {
+		// data file from config
+		for _, tmpl := range config.Templates {
+			if tmpl.DataFile == "" {
+				continue
+			}
+			data, err := parseJSONFile(tmpl.DataFile)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
+				os.Exit(1)
+			}
+			tmpl.Data = data
+		}
 	}
 
 	// data arguments
