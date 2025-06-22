@@ -118,7 +118,7 @@ func Run() {
 	file := flag.String("file", "", "read template from `file`")
 	output := flag.String("output", "", "write output to `file`")
 	dataFile := flag.String("data-file", "", "load data from `file`")
-	json := flag.String("json", "", "read input data from `json`")
+	json := flag.String("data", "", "read input data from `json`")
 	configFile := flag.String("config", ".doc-template-go.json", "read configuration from `file`")
 	flag.Parse()
 
