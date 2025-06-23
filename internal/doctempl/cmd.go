@@ -123,7 +123,8 @@ func Run() {
 	flag.Parse()
 
 	// read config file
-	config, err := LoadConfig(*configFile)
+	config := NewConfig()
+	err := config.Load(*configFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not load config file: %v\n", err)
 		config = &Config{}

@@ -18,15 +18,16 @@ type Config struct {
 	Templates []*ConfigTemplate
 }
 
-// LoadConfig loads a Config from file.
-func LoadConfig(file string) (*Config, error) {
+// Load loads the configuration from file.
+func (c *Config) Load(file string) error {
 	f, err := os.ReadFile(file)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	c := &Config{}
-	if err := json.Unmarshal(f, c); err != nil {
-		return nil, err
-	}
-	return c, nil
+	return json.Unmarshal(f, c)
+}
+
+// NewConfig returns a new Config.
+func NewConfig() *Config {
+	return &Config{}
 }
