@@ -114,17 +114,20 @@ func runTemplates(config *Config) error {
 
 // Run is the main entry point.
 func Run() {
+	// create config
+	config := NewConfig()
+
 	// command line arguments
 	file := flag.String("file", "", "read template from `file`")
 	output := flag.String("output", "", "write output to `file`")
 	dataFile := flag.String("data-file", "", "load data from `file`")
 	json := flag.String("data", "", "read input data from `json`")
-	configFile := flag.String("config", ".doc-template-go.json", "read configuration from `file`")
+	flag.StringVar(&config.ConfigFile, "config", ".doc-template-go.json",
+		"read configuration from `file`")
 	flag.Parse()
 
 	// read config file
-	config := NewConfig()
-	err := config.Load(*configFile)
+	err := config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not load config file: %v\n", err)
 		config = &Config{}

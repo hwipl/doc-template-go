@@ -15,12 +15,13 @@ type ConfigTemplate struct {
 
 // Config is a document template configuration.
 type Config struct {
+	ConfigFile string `json:"-"`
 	Templates []*ConfigTemplate
 }
 
 // Load loads the configuration from file.
-func (c *Config) Load(file string) error {
-	f, err := os.ReadFile(file)
+func (c *Config) Load() error {
+	f, err := os.ReadFile(c.ConfigFile)
 	if err != nil {
 		return err
 	}

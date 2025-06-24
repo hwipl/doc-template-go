@@ -13,22 +13,25 @@ func TestConfigLoad(t *testing.T) {
 
 	// not existing file
 	c := NewConfig()
-	if err := c.Load(filepath.Join("does not exist")); err == nil {
+	c.ConfigFile = filepath.Join("does not exist")
+	if err := c.Load(); err == nil {
 		t.Error("not existing file should return error")
 	}
 
 	// empty file
 	c = NewConfig()
 	f := filepath.Join(d, "config.json")
+	c.ConfigFile = f
 	if err := os.WriteFile(f, []byte(""), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.Load(f); err == nil {
+	if err := c.Load(); err == nil {
 		t.Error("empty file should return error")
 	}
 
 	// valid file
 	c = NewConfig()
+	c.ConfigFile = f
 	data := []byte(`{
 	"Templates": [
 		{
@@ -42,6 +45,7 @@ func TestConfigLoad(t *testing.T) {
 	]
 	}`)
 	want := &Config{
+		ConfigFile: f,
 		Templates: []*ConfigTemplate{
 			{
 				File:     "template1.tmpl",
@@ -56,7 +60,7 @@ func TestConfigLoad(t *testing.T) {
 	if err := os.WriteFile(f, data, 0600); err != nil {
 		t.Fatal(err)
 	}
-	err := c.Load(f)
+	err := c.Load()
 	if err != nil {
 		t.Error(err)
 	}
