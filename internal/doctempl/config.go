@@ -9,12 +9,14 @@ import (
 type ConfigTemplate struct {
 	File     string
 	Output   string
-	Data     map[string]any
 	DataFile string
+	Data     map[string]any
 }
 
 // Config is a document template configuration.
 type Config struct {
+	*ConfigTemplate `json:"-"`
+
 	ConfigFile string `json:"-"`
 	Templates []*ConfigTemplate
 }

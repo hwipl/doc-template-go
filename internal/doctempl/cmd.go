@@ -118,12 +118,12 @@ func Run() {
 	config := NewConfig()
 
 	// command line arguments
-	file := flag.String("file", "", "read template from `file`")
-	output := flag.String("output", "", "write output to `file`")
-	dataFile := flag.String("data-file", "", "load data from `file`")
-	json := flag.String("data", "", "read input data from `json`")
 	flag.StringVar(&config.ConfigFile, "config", ".doc-template-go.json",
 		"read configuration from `file`")
+	flag.StringVar(&config.File, "file", "", "read template from `file`")
+	flag.StringVar(&config.Output, "output", "", "write output to `file`")
+	flag.StringVar(&config.DataFile, "data-file", "", "load data from `file`")
+	json := flag.String("data", "", "read input data from `json`")
 	flag.Parse()
 
 	// read config file
@@ -134,9 +134,9 @@ func Run() {
 	}
 
 	// template file argument
-	if *file != "" {
+	if config.File != "" {
 		config.Templates = []*ConfigTemplate{
-			{File: *file},
+			{File: config.File},
 		}
 	}
 	if len(config.Templates) == 0 {
@@ -145,9 +145,9 @@ func Run() {
 	}
 
 	// data file
-	if *dataFile != "" {
+	if config.DataFile != "" {
 		// data file from command line arguments
-		data, err := parseJSONFile(*dataFile)
+		data, err := parseJSONFile(config.DataFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
 			os.Exit(1)
@@ -186,9 +186,9 @@ func Run() {
 	}
 
 	// set output in config
-	if *output != "" {
+	if config.Output != "" {
 		for _, tmpl := range config.Templates {
-			tmpl.Output = *output
+			tmpl.Output = config.Output
 		}
 	}
 
