@@ -15,7 +15,7 @@ type ConfigTemplate struct {
 
 // Config is a document template configuration.
 type Config struct {
-	*ConfigTemplate `json:"-"`
+	ConfigTemplate `json:"-"`
 
 	ConfigFile string `json:"-"`
 	Templates []*ConfigTemplate
