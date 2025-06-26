@@ -123,7 +123,7 @@ func Run() {
 	flag.StringVar(&config.File, "file", "", "read template from `file`")
 	flag.StringVar(&config.Output, "output", "", "write output to `file`")
 	flag.StringVar(&config.DataFile, "data-file", "", "load data from `file`")
-	json := flag.String("data", "", "read input data from `json`")
+	flag.StringVar(&config.DataString, "data", "", "read input data from `json`")
 	flag.Parse()
 
 	// read config file
@@ -177,8 +177,8 @@ func Run() {
 		os.Exit(1)
 	}
 
-	if *json != "" {
-		data, err = parseJSONArg(*json)
+	if config.DataString != "" {
+		data, err = parseJSONArg(config.DataString)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing json: %v\n", err)
 			os.Exit(1)

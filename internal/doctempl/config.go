@@ -18,7 +18,8 @@ type Config struct {
 	ConfigTemplate `json:"-"`
 
 	ConfigFile string `json:"-"`
-	Templates []*ConfigTemplate
+	DataString string `json:"-"`
+	Templates  []*ConfigTemplate
 }
 
 // Load loads the configuration from file.
