@@ -112,19 +112,21 @@ func runTemplates(config *Config) error {
 	return nil
 }
 
-// Run is the main entry point.
-func Run() {
+// getConfig returns a config with fields loaded from command line arguments in
+// args and from a config file.
+func getConfig(args []string) *Config {
 	// create config
 	config := NewConfig()
 
 	// command line arguments
-	flag.StringVar(&config.ConfigFile, "config", ".doc-template-go.json",
+	fs := flag.NewFlagSet(args[0], flag.ExitOnError)
+	fs.StringVar(&config.ConfigFile, "config", ".doc-template-go.json",
 		"read configuration from `file`")
-	flag.StringVar(&config.File, "file", "", "read template from `file`")
-	flag.StringVar(&config.Output, "output", "", "write output to `file`")
-	flag.StringVar(&config.DataFile, "data-file", "", "load data from `file`")
-	flag.StringVar(&config.DataString, "data", "", "read input data from `json`")
-	flag.Parse()
+	fs.StringVar(&config.File, "file", "", "read template from `file`")
+	fs.StringVar(&config.Output, "output", "", "write output to `file`")
+	fs.StringVar(&config.DataFile, "data-file", "", "load data from `file`")
+	fs.StringVar(&config.DataString, "data", "", "read input data from `json`")
+	_ = fs.Parse(args[1:])
 
 	// read config file
 	err := config.Load()
@@ -140,7 +142,7 @@ func Run() {
 		}
 	}
 	if len(config.Templates) == 0 {
-		flag.Usage()
+		fs.Usage()
 		os.Exit(1)
 	}
 
@@ -171,7 +173,7 @@ func Run() {
 	}
 
 	// data arguments
-	data, err := parseArgs(flag.Args())
+	data, err := parseArgs(fs.Args())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing arguments: %v\n", err)
 		os.Exit(1)
@@ -199,6 +201,15 @@ func Run() {
 		}
 	}
 
+	return config
+}
+
+// Run is the main entry point.
+func Run() {
+	// get config
+	config := getConfig(os.Args)
+
+	// run templates in config
 	if err := runTemplates(config); err != nil {
 		fmt.Fprintf(os.Stderr, "Error running templates: %v\n", err)
 		os.Exit(1)
