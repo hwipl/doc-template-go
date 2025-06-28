@@ -114,7 +114,7 @@ func runTemplates(config *Config) error {
 
 // getConfig returns a config with fields loaded from command line arguments in
 // args and from a config file.
-func getConfig(args []string) *Config {
+func getConfig(args []string) (*Config, error) {
 	// create config
 	config := NewConfig()
 
@@ -143,7 +143,7 @@ func getConfig(args []string) *Config {
 	}
 	if len(config.Templates) == 0 {
 		fs.Usage()
-		os.Exit(1)
+		return nil, fmt.Errorf("no templates found")
 	}
 
 	// data file
@@ -151,8 +151,7 @@ func getConfig(args []string) *Config {
 		// data file from command line arguments
 		data, err := parseJSONFile(config.DataFile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
-			os.Exit(1)
+			return nil, fmt.Errorf("error parsing data file: %w", err)
 		}
 		for _, tmpl := range config.Templates {
 			tmpl.Data = data
@@ -165,8 +164,7 @@ func getConfig(args []string) *Config {
 			}
 			data, err := parseJSONFile(tmpl.DataFile)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error parsing data file: %v\n", err)
-				os.Exit(1)
+				return nil, fmt.Errorf("error parsing data file: %w", err)
 			}
 			tmpl.Data = data
 		}
@@ -175,15 +173,13 @@ func getConfig(args []string) *Config {
 	// data arguments
 	data, err := parseArgs(fs.Args())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing arguments: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error parsing arguments: %w", err)
 	}
 
 	if config.DataString != "" {
 		data, err = parseJSONArg(config.DataString)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing json: %v\n", err)
-			os.Exit(1)
+			return nil, fmt.Errorf("error parsing json: %w", err)
 		}
 	}
 
@@ -201,13 +197,17 @@ func getConfig(args []string) *Config {
 		}
 	}
 
-	return config
+	return config, nil
 }
 
 // Run is the main entry point.
 func Run() {
 	// get config
-	config := getConfig(os.Args)
+	config, err := getConfig(os.Args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting configuration: %v\n", err)
+		os.Exit(1)
+	}
 
 	// run templates in config
 	if err := runTemplates(config); err != nil {
