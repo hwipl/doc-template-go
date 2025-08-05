@@ -1,6 +1,7 @@
 package doctempl
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -61,5 +62,29 @@ func TestParseArgs(t *testing.T) {
 		if !reflect.DeepEqual(got, args.want) {
 			t.Errorf("%d: got %v, want %v", i, got, args.want)
 		}
+	}
+}
+
+// TestGetConfig tests getConfig.
+func TestGetConfig(t *testing.T) {
+	// files
+	dir := t.TempDir()
+	config := filepath.Join(dir, ".doc-template-go.json")
+	tmpl := filepath.Join(dir, "template.tmpl")
+	data := filepath.Join(dir, "data")
+
+	// no config, no template
+	if _, err := getConfig([]string{"test", "-config", config}); err == nil {
+		t.Error("no templates should return error")
+	}
+
+	// no config, not existing template
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl}); err != nil {
+		t.Error(err)
+	}
+
+	// no config, not existing template, not existing data file
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data-file", data}); err == nil {
+		t.Error("not existing data file should return error")
 	}
 }
