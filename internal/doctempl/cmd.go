@@ -138,12 +138,12 @@ func getConfig(args []string) (*Config, error) {
 
 	// read config file
 	config := NewConfig()
-	if flagIsSet(fs, "config") {
-		config.ConfigFile = *flagConfig
-	}
+	config.ConfigFile = *flagConfig
 	err := config.Load()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not load config file: %v\n", err)
+		if flagIsSet(fs, "config") {
+			return nil, fmt.Errorf("error loading config file: %w", err)
+		}
 	}
 
 	// template file argument

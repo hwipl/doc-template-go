@@ -1,6 +1,7 @@
 package doctempl
 
 import (
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -75,15 +76,20 @@ func TestGetConfig(t *testing.T) {
 
 	// no config, no template
 	if _, err := getConfig([]string{"test", "-config", config}); err == nil {
-		t.Error("no templates should return error")
+		t.Error("no config should return error")
 	}
 
-	// no config, not existing template
+	// create empty config
+	if err := os.WriteFile(config, []byte("{}"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	// empty config, not existing template
 	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl}); err != nil {
 		t.Error(err)
 	}
 
-	// no config, not existing template, not existing data file
+	// empty config, not existing template, not existing data file
 	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data-file", data}); err == nil {
 		t.Error("not existing data file should return error")
 	}
