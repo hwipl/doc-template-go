@@ -84,6 +84,11 @@ func TestGetConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// empty config, no template
+	if _, err := getConfig([]string{"test", "-config", config}); err == nil {
+		t.Error("no template should return error")
+	}
+
 	// empty config, not existing template
 	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl}); err != nil {
 		t.Error(err)
@@ -92,5 +97,30 @@ func TestGetConfig(t *testing.T) {
 	// empty config, not existing template, not existing data file
 	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data-file", data}); err == nil {
 		t.Error("not existing data file should return error")
+	}
+
+	// create empty data file
+	if err := os.WriteFile(data, []byte("{}"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	// empty config, not existing template, empty data file
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data-file", data}); err != nil {
+		t.Error(err)
+	}
+
+	// empty config, not existing template, invalid data
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data", ""}); err == nil {
+		t.Error("invalid data should return error")
+	}
+
+	// empty config, not existing template, empty data file, output
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data-file", data, "-output", "out"}); err != nil {
+		t.Error(err)
+	}
+
+	// empty config, not existing template, data
+	if _, err := getConfig([]string{"test", "-config", config, "-file", tmpl, "-data", "{\"one\": 1}"}); err != nil {
+		t.Error(err)
 	}
 }
