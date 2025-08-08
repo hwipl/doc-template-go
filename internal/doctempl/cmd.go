@@ -123,17 +123,26 @@ func flagIsSet(fs *flag.FlagSet, name string) bool {
 	return isSet
 }
 
+// command line arguments
+const (
+	argConfig   = "config"
+	argFile     = "file"
+	argOutput   = "output"
+	argDataFile = "data-file"
+	argData     = "data"
+)
+
 // getConfig returns a config with fields loaded from command line arguments in
 // args and from a config file.
 func getConfig(args []string) (*Config, error) {
 	// command line arguments
 	fs := flag.NewFlagSet(args[0], flag.ExitOnError)
-	flagConfig := fs.String("config", ".doc-template-go.json",
+	flagConfig := fs.String(argConfig, ".doc-template-go.json",
 		"read configuration from `file`")
-	flagFile := fs.String("file", "", "read template from `file`")
-	flagOutput := fs.String("output", "", "write output to `file`")
-	flagDataFile := fs.String("data-file", "", "load data from json `file`")
-	flagData := fs.String("data", "", "read input data from `json`")
+	flagFile := fs.String(argFile, "", "read template from `file`")
+	flagOutput := fs.String(argOutput, "", "write output to `file`")
+	flagDataFile := fs.String(argDataFile, "", "load data from json `file`")
+	flagData := fs.String(argData, "", "read input data from `json`")
 	_ = fs.Parse(args[1:])
 
 	// read config file
@@ -141,13 +150,13 @@ func getConfig(args []string) (*Config, error) {
 	config.ConfigFile = *flagConfig
 	err := config.Load()
 	if err != nil {
-		if flagIsSet(fs, "config") {
+		if flagIsSet(fs, argConfig) {
 			return nil, fmt.Errorf("error loading config file: %w", err)
 		}
 	}
 
 	// template file argument
-	if flagIsSet(fs, "file") {
+	if flagIsSet(fs, argFile) {
 		config.File = *flagFile
 
 		config.Templates = []*ConfigTemplate{
@@ -160,7 +169,7 @@ func getConfig(args []string) (*Config, error) {
 	}
 
 	// data file
-	if flagIsSet(fs, "data-file") {
+	if flagIsSet(fs, argDataFile) {
 		config.DataFile = *flagDataFile
 
 		// data file from command line arguments
@@ -191,7 +200,7 @@ func getConfig(args []string) (*Config, error) {
 		return nil, fmt.Errorf("error parsing arguments: %w", err)
 	}
 
-	if flagIsSet(fs, "data") {
+	if flagIsSet(fs, argData) {
 		config.DataString = *flagData
 
 		data, err = parseJSONArg(config.DataString)
@@ -201,7 +210,7 @@ func getConfig(args []string) (*Config, error) {
 	}
 
 	// set output in config
-	if flagIsSet(fs, "output") {
+	if flagIsSet(fs, argOutput) {
 		config.Output = *flagOutput
 
 		for _, tmpl := range config.Templates {
