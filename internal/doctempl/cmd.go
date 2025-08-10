@@ -157,10 +157,8 @@ func getConfig(args []string) (*Config, error) {
 
 	// template file argument
 	if flagIsSet(fs, argFile) {
-		config.File = *flagFile
-
 		config.Templates = []*ConfigTemplate{
-			{File: config.File},
+			{File: *flagFile},
 		}
 	}
 	if len(config.Templates) == 0 {
@@ -170,10 +168,8 @@ func getConfig(args []string) (*Config, error) {
 
 	// data file
 	if flagIsSet(fs, argDataFile) {
-		config.DataFile = *flagDataFile
-
 		// data file from command line arguments
-		data, err := parseJSONFile(config.DataFile)
+		data, err := parseJSONFile(*flagDataFile)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing data file: %w", err)
 		}
@@ -211,10 +207,8 @@ func getConfig(args []string) (*Config, error) {
 
 	// set output in config
 	if flagIsSet(fs, argOutput) {
-		config.Output = *flagOutput
-
 		for _, tmpl := range config.Templates {
-			tmpl.Output = config.Output
+			tmpl.Output = *flagOutput
 		}
 	}
 
