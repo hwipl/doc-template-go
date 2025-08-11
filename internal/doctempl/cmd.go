@@ -197,9 +197,7 @@ func getConfig(args []string) (*Config, error) {
 	}
 
 	if flagIsSet(fs, argData) {
-		config.DataString = *flagData
-
-		data, err = parseJSONArg(config.DataString)
+		data, err = parseJSONArg(*flagData)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing json: %w", err)
 		}
