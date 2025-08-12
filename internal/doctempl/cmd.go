@@ -146,13 +146,12 @@ func getConfig(args []string) (*Config, error) {
 	_ = fs.Parse(args[1:])
 
 	// read config file
-	config := NewConfig()
-	config.ConfigFile = *flagConfig
-	err := config.Load()
+	config, err := LoadConfig(*flagConfig)
 	if err != nil {
 		if flagIsSet(fs, argConfig) {
 			return nil, fmt.Errorf("error loading config file: %w", err)
 		}
+		config = NewConfig()
 	}
 
 	// template file argument

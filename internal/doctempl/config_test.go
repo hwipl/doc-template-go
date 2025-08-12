@@ -7,31 +7,26 @@ import (
 	"testing"
 )
 
-// TestConfigLoad tests Load of Config.
-func TestConfigLoad(t *testing.T) {
+// TestLoadConfig tests LoadConfig.
+func TestLoadConfig(t *testing.T) {
 	d := t.TempDir()
 
 	// not existing file
-	c := NewConfig()
-	c.ConfigFile = filepath.Join("does not exist")
-	if err := c.Load(); err == nil {
+	f := filepath.Join("does not exist")
+	if _, err := LoadConfig(f); err == nil {
 		t.Error("not existing file should return error")
 	}
 
 	// empty file
-	c = NewConfig()
-	f := filepath.Join(d, "config.json")
-	c.ConfigFile = f
+	f = filepath.Join(d, "config.json")
 	if err := os.WriteFile(f, []byte(""), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.Load(); err == nil {
+	if _, err := LoadConfig(f); err == nil {
 		t.Error("empty file should return error")
 	}
 
 	// valid file
-	c = NewConfig()
-	c.ConfigFile = f
 	data := []byte(`{
 	"Templates": [
 		{
@@ -45,7 +40,6 @@ func TestConfigLoad(t *testing.T) {
 	]
 	}`)
 	want := &Config{
-		ConfigFile: f,
 		Templates: []*ConfigTemplate{
 			{
 				File:     "template1.tmpl",
@@ -60,7 +54,7 @@ func TestConfigLoad(t *testing.T) {
 	if err := os.WriteFile(f, data, 0600); err != nil {
 		t.Fatal(err)
 	}
-	err := c.Load()
+	c, err := LoadConfig(f)
 	if err != nil {
 		t.Error(err)
 	}
