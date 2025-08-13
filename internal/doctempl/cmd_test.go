@@ -66,6 +66,56 @@ func TestParseArgs(t *testing.T) {
 	}
 }
 
+// TestRunTemplates tests runTemplates.
+func TestRunTemplates(t *testing.T) {
+	// files
+	dir := t.TempDir()
+	tmpl := filepath.Join(dir, "template.tmpl")
+	out := filepath.Join(dir, "output")
+
+	// not existing template
+	config := NewConfig()
+	config.Templates = []*ConfigTemplate{
+		{File: tmpl},
+	}
+	if err := runTemplates(config); err == nil {
+		t.Error("not existing template should return error")
+	}
+
+	// create template
+	if err := os.WriteFile(tmpl, []byte(""), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	// empty template, no output file
+	config = NewConfig()
+	config.Templates = []*ConfigTemplate{
+		{File: tmpl},
+	}
+	if err := runTemplates(config); err != nil {
+		t.Error(err)
+		//t.Error("not existing template should return error")
+	}
+
+	// empty template, output file
+	config = NewConfig()
+	config.Templates = []*ConfigTemplate{
+		{File: tmpl, Output: out},
+	}
+	if err := runTemplates(config); err != nil {
+		t.Error(err)
+	}
+
+	// empty template, existing output file
+	config = NewConfig()
+	config.Templates = []*ConfigTemplate{
+		{File: tmpl, Output: out},
+	}
+	if err := runTemplates(config); err == nil {
+		t.Error("existing output file should return error")
+	}
+}
+
 // TestGetConfig tests getConfig.
 func TestGetConfig(t *testing.T) {
 	// files
